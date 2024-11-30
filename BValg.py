@@ -114,20 +114,64 @@ class BVAlgorithm_qiskit(QuantumAlgorithm):
         self._simulator=simulator
         
         
-    
+'''
+The logic version of Berstain vazirani algorithm using [4,2,2] code
+'''
 def logicBValgorithm(QuantumAlgorithm):
     def __init__(self, num_qubits: int) -> None:
         self.num_qubits = num_qubits
 
-    def construct_circuit(self) -> NotImplementedError:
-        raise NotImplementedError("Subclasses must implement construct_circuit method.")
+    def logicX(self,index):
+        pass    
+    
+    def logicH(self,index):
+        pass 
+    
+    def logicCNOT(self,control,target):
+        pass 
+
+    def logicCZ(self,control,target):
+        pass
+    
+    
+    def construct_circuit(self) -> None:
+        inputdim = self.num_qubits - 1
+        '''
+        The first layer of Hadmard 
+        '''
+        self.logicX(inputdim)
+        self.logicH(list(range(0, self.num_qubits)))
+        self.compile_func()
+        self.logicH(list(range(0, self.num_qubits)))
+        self.circuit.measure(list(range(0, self.num_qubits - 1)), list(range(0, self.num_qubits - 1)))
+
+
 
     def clear_circuit(self) -> NotImplementedError:
         raise NotImplementedError("Subclasses must implement construct_circuit method.")
 
 
-    def set_input(self, alginput: List) -> NotImplementedError:
-        raise NotImplementedError("Subclasses must implement set_input method.")
+    def compile_func(self) -> None:
+        alist = convert_int_to_list(self.num_qubits - 1, self._a)
+        for i in range(0, self.num_qubits - 1):
+            if alist[i] == 1:
+                self.logicCNOT(i, self.num_qubits - 1)
+                #self.circuit.cx(i, self.num_qubits - 1)
+        if self._b == 1:
+            #self.circuit.x(self.num_qubits - 1)
+            self.logicX(self.num_qubits - 1)
+        return
+
+    def set_input(self, parameter: List) -> None:
+        if len(parameter) != 2:
+            raise ValueError("Berstain vazirani must have two input parameter a,b!")
+        self._a = parameter[0]
+        self._b = parameter[1]
+        if self._b != 0 and self._b != 1:
+            raise ValueError("b has to be 0 or 1")
+        if not (0 <= self._a < (1 << (self.num_qubits - 1))):
+            raise ValueError("a out of range")
+
 
     def compute_result(self) -> NotImplementedError:
         raise NotImplementedError("Subclasses must implement compute_result method.")    
