@@ -121,18 +121,33 @@ def logicBValgorithm(QuantumAlgorithm):
     def __init__(self, num_qubits: int) -> None:
         self.num_qubits = num_qubits
 
+    #Implement the logial X gate
     def logicX(self,index):
         pass    
     
+    #Implement the logial H gate    
     def logicH(self,index):
         pass 
     
+    #Implement the logial CNOT gate        
     def logicCNOT(self,control,target):
         pass 
 
+    #Implement the logial CZ gate  
     def logicCZ(self,control,target):
         pass
     
+    #Compile the circuit that generate a cat state for syndrome measurement
+    def compile_cat_state(self):
+        pass 
+ 
+    #Compile the circuit that verify the cat state correctness
+    def cat_state_verification(self):
+        pass 
+    
+    #Postselection gadget
+    def postSelection(self):
+        pass
     
     def construct_circuit(self) -> None:
         inputdim = self.num_qubits - 1
