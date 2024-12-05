@@ -118,8 +118,11 @@ class BVAlgorithm_qiskit(QuantumAlgorithm):
 The logic version of Berstain vazirani algorithm using [4,2,2] code
 '''
 def logicBValgorithm(QuantumAlgorithm):
-    def __init__(self, num_qubits: int) -> None:
-        self.num_qubits = num_qubits
+    def __init__(self, num_logic_qubits: int) -> None:
+        self.num_qubits = 4*num_logic_qubits
+        self.num_logic_qubits = num_logic_qubits
+        
+        
 
     #Implement the logial X gate
     def logicX(self,index):
