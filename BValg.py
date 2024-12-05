@@ -22,12 +22,16 @@ class QuantumAlgorithm:
 
     def __init__(self, num_qubits: int) -> None:
         self.num_qubits = num_qubits
-
+        self._noise_model = None
+        
     def construct_circuit(self) -> NotImplementedError:
         raise NotImplementedError("Subclasses must implement construct_circuit method.")
 
     def clear_circuit(self) -> NotImplementedError:
         raise NotImplementedError("Subclasses must implement construct_circuit method.")
+
+    def set_noise_model(self, noise_model: Any) -> None:
+        self._noise_model = noise_model
 
 
     def set_input(self, alginput: List) -> NotImplementedError:
@@ -59,9 +63,9 @@ class BVAlgorithm_qiskit(QuantumAlgorithm):
         The first layer of Hadmard 
         '''
         self.circuit.x(inputdim)
-        self.circuit.h(list(range(0, self.num_qubits)))
+        self.circuit.h(list(range(0, self.num_qubits-1)))
         self.compile_func()
-        self.circuit.h(list(range(0, self.num_qubits)))
+        self.circuit.h(list(range(0, self.num_qubits-1)))
         self.circuit.measure(list(range(0, self.num_qubits - 1)), list(range(0, self.num_qubits - 1)))
 
     '''
@@ -85,26 +89,36 @@ class BVAlgorithm_qiskit(QuantumAlgorithm):
         alist = convert_int_to_list(self.num_qubits - 1, self._a)
         for i in range(0, self.num_qubits - 1):
             if alist[i] == 1:
-                self.circuit.cx(i, self.num_qubits - 1)
+                self.circuit.cz(i, self.num_qubits - 1)
         if self._b == 1:
             self.circuit.x(self.num_qubits - 1)
         return
 
-    def compute_result(self) -> None:
+    def a_to_string(self) -> str:
+        return bin(self._a)[2:].zfill(self.num_qubits - 1)[::-1]
+
+
+    def compute_result(self,shots) -> None:
         compiled_circuit = qiskit.transpile(self.circuit, self.simulator)
-
         # Execute the circuit on the aer simulator
-        job = self.simulator.run(compiled_circuit, shots=1)
-
+        job = self.simulator.run(compiled_circuit, shots=shots,noise_model=self._noise_model)
         # Grab results from the job
         result = job.result()
         # print(result)
         # Returns counts
-        counts = result.get_counts(compiled_circuit)
-        result = list(counts.keys())[0]
+        counts = dict(result.get_counts(compiled_circuit))
+        
+        if self.a_to_string() in counts:
+            result = counts[self.a_to_string()]
+        else:
+            result = 0
+            
+        accuracy=result/shots
+        
         self.computed = True
-        self.computed_a_value = int(result[::-1], 2)
-        print(f"The function is f(x)={result[::-1]}x+{self._b}")
+    
+        return accuracy
+
 
     def a_result(self) -> int:
         return self.computed_a_value

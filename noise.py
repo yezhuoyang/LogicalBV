@@ -9,6 +9,8 @@ import numpy as np
 
 
 
+
+
 def construct_bitflip_noise_model(p_reset, p_meas, p_gate1):
     # Example error probabilities
     p_reset = p_reset
@@ -71,11 +73,11 @@ def construct_phaseflip_noise_model(p_reset, p_meas, p_gate1):
 
 
 
-def construct_bitphaseflip_noise_model(p_reset, p_meas, p_gate1):
+def construct_bitphaseflip_noise_model(p):
     # Example error probabilities
-    p_reset = p_reset
-    p_meas = p_meas
-    p_gate1 = p_gate1
+    p_reset = p
+    p_meas = p
+    p_gate1 = p
 
     # QuantumError objects
     error_reset = pauli_error([('Z', p_reset), ('I', 1 - p_reset)])
@@ -89,17 +91,20 @@ def construct_bitphaseflip_noise_model(p_reset, p_meas, p_gate1):
     error_gate1_bit = pauli_error([('X',p_gate1), ('I', 1 - p_gate1)])
     error_gate2_bit = error_gate1_bit.tensor(error_gate1)
 
+
+
+    # QuantumError objects
+    error_reset = pauli_error([('Z', p), ('X', p), ('I', 1 - 2*p)])
+    error_meas = pauli_error([('Z', p), ('X', p), ('I', 1 - 2*p)])
+    error_gate1 = pauli_error([('Z', p), ('X', p), ('I', 1 - 2*p)])
+    error_gate2 = error_gate1.tensor(error_gate1)
+
     # Add errors to noise model
     noise_bitphase_flip = NoiseModel()
-    noise_bitphase_flip.add_all_qubit_quantum_error(error_reset_bit, "reset")
-    noise_bitphase_flip.add_all_qubit_quantum_error(error_meas_bit, "measure")
-    noise_bitphase_flip.add_all_qubit_quantum_error(error_gate1_bit, ["t","tdg"])
-    noise_bitphase_flip.add_all_qubit_quantum_error(error_gate2_bit, ["cx"])
-
     noise_bitphase_flip.add_all_qubit_quantum_error(error_reset, "reset")
     noise_bitphase_flip.add_all_qubit_quantum_error(error_meas, "measure")
-    noise_bitphase_flip.add_all_qubit_quantum_error(error_gate1, ["t","tdg"])
-    noise_bitphase_flip.add_all_qubit_quantum_error(error_gate2, ["cz"])
+    noise_bitphase_flip.add_all_qubit_quantum_error(error_gate1, ["t","tdg","h"])
+    noise_bitphase_flip.add_all_qubit_quantum_error(error_gate2, ["cz","cx"])
 
     return noise_bitphase_flip
 
